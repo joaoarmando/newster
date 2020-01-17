@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "855120942604",
+    "firebase_url": "https://upnews-af879.firebaseio.com",
+    "project_id": "upnews-af879",
+    "storage_bucket": "upnews-af879.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:855120942604:android:ab9ed18e09b9c22a318029",
+        "android_client_info": {
+          "package_name": "com.app.upnews"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "855120942604-ufpsd2n04dkik1eeillk57l9b47vq2o2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.upnews",
+            "certificate_hash": "eeb4394e8611870fa0a732997bdba637d20e403c"
+          }
+        },
+        {
+          "client_id": "855120942604-g7qgrdhogl1sg0kp78mumq6jnpqr112m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDL-uF9wxmbMh0DUq7QnEzPgHsXDkqG1JA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "855120942604-g7qgrdhogl1sg0kp78mumq6jnpqr112m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
