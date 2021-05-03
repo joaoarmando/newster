@@ -16,6 +16,7 @@ String country;
 int feedStyle;
 
 
+
 Future<bool> hasInternetConnection(bool useDelay) async {
     try {
       final result = await InternetAddress.lookup('google.com');
