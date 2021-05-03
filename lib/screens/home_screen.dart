@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: SafeArea(
                     child: NestedScrollView(
                       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                        return _headerSliverBuilderContent(context,categories);
+                        return _headerSliverBuilderContent(categories);
                       },
                       body: TabBarView(
                         children:  categories.map((c) => _buildListNews(c,categories)).toList(),
@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
     
-  Widget _buildAppBarHome(BuildContext context){
+  Widget _buildAppBarHome(){
     
     return Container(
       height: 55,
@@ -132,7 +132,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildCategories(BuildContext context, List<CategoryData> categories){
+  Widget _buildCategories(List<CategoryData> categories){
     return Container(
       height: 55,
       child: TabBar(
@@ -209,12 +209,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  _headerSliverBuilderContent(BuildContext context, List<CategoryData> categories){
+  _headerSliverBuilderContent(List<CategoryData> categories){
     return <Widget>[
       SliverList(
         delegate: SliverChildListDelegate(
           [
-            _buildAppBarHome(context),
+            _buildAppBarHome(),
           ]
         ),
       ),
@@ -222,7 +222,7 @@ class _HomeScreenState extends State<HomeScreen> {
         delegate: _SliverAppBarDelegate(
           PreferredSize(
             preferredSize: Size(MediaQuery.of(context).size.width, 55),
-            child: _buildCategories(context,categories),
+            child: _buildCategories(categories),
           )
         ),
         pinned: true,

@@ -20,7 +20,7 @@ Future<bool> hasInternetConnection(bool useDelay) async {
     try {
       final result = await InternetAddress.lookup('google.com');
       if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        return true; // <= FAZ ISSO RETORNAR TRUE DPS
+          return true;
       }
     } on SocketException catch (_) {
       if (useDelay) await Future.delayed(Duration(milliseconds:600));
@@ -38,11 +38,12 @@ Future<bool> hasInternetConnection(bool useDelay) async {
      await prefs.setInt('feedStyle', feedStyle);
   }
 
-  void getSharedPreferences() async {
+  Future<Null> getSharedPreferences() async {
     prefs = await SharedPreferences.getInstance();
   }
 
   Future<String> getCountry() async{
+    if (prefs == null) await getSharedPreferences();
     country = prefs.getString('country');
     if (country == null) country = await getCountryFromIP();
     if (country == null) country = "US"; // default country;
@@ -55,7 +56,7 @@ Future<bool> hasInternetConnection(bool useDelay) async {
   }
 
   Future<String> getCountryFromIP() async{
-    final response = await http.get("https://geo.qualaroo.com/json/");
+    final response = await http.get(Uri.parse("https://geo.qualaroo.com/json/"));
     final location = json.decode(response.body);
     country = "${location["country_code"]}";
     saveCountry(country);

@@ -121,7 +121,7 @@ class MyAccountBloc extends BlocBase  with SignUpValidator{
        _pictureController.sink.add(null);
        return;
     }
-    var response = await http.get(_userBloc.getUserPictureUrl());
+    var response = await http.get(Uri.parse(_userBloc.getUserPictureUrl()));
     File picture = await _userBloc.createFileFromString(response);
     _pictureController.sink.add(picture);
   }

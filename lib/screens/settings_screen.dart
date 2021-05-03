@@ -19,8 +19,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   
 
 
-   var countryCode = "";
-   var countryName = "";
+   var countryCode = "US";
+   var countryName = "United States";
 
   @override
   void initState() { 
@@ -450,6 +450,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   } 
 
   Widget _buildFlagIcon(String countryCode){
+
+    print("CountryCOde $countryCode");
     return Container(
       margin: EdgeInsets.only(right: 12),
       alignment: Alignment.centerRight,

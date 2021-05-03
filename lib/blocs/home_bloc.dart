@@ -65,6 +65,7 @@ class HomeBloc extends BlocBase {
   void getCategories() async {
     country = await getCountry();
     categorieList.clear();
+    print("Country: $country");
     var queryBuilder = QueryBuilder(ParseObject('Categories'))
       ..whereEqualTo("country",country.toUpperCase());
 
@@ -73,9 +74,11 @@ class HomeBloc extends BlocBase {
       
       if (apiResponse.result != null)
         for (ParseObject categories in apiResponse.result){
-            for (Map<String,dynamic> category in categories.get("categories")){
-              categorieList.add(CategoryData.fromJSON(category));
-            }
+              print(categories.get("categories"));
+            categories.get("categories").forEach((value) {
+              categorieList.add(CategoryData.fromJSON(value));
+            });
+            print(categorieList.length);
         }
         if (categorieList.length == 0){
           // PAÍS NÃO SUPORTADO

@@ -3,12 +3,9 @@ import 'dart:math';
 import 'dart:convert';
 import 'dart:typed_data';
 
-
-//import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:bloc_pattern/bloc_pattern.dart';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:parse_server_sdk/parse_server_sdk.dart';
+import 'package:parse_server_sdk_flutter/parse_server_sdk.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:rxdart/subjects.dart';
@@ -20,14 +17,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum DialogState{DIALOG_OPTIONS,LOGIN_STATE,LOGIN_SUCCESSFULLY}
 class UserBloc extends BlocBase{
 
+
+  UserBloc() {
+    getSharedPreferences();
+  }
+
   String userEmail, userName, urlPicture;
   SharedPreferences prefs;
-
-   /*GoogleSignIn _googleSignIn = GoogleSignIn(
-      scopes: [
-        'email'
-      ],
-    ); */
 
   final _userController = BehaviorSubject<ParseUser>();
   final _pictureController = BehaviorSubject<String>();
@@ -42,20 +38,24 @@ class UserBloc extends BlocBase{
   
   Future<Null> checkLogin() async {
     user = await ParseUser.currentUser();
+    if (user != null) print("user = ${user.sessionToken}");
+    if (prefs == null) await getSharedPreferences();
     if (user == null) {
        saveUrlPictureSharedPreferences(null);
       _pictureController.sink.add(urlPicture);
       return;
     }
 
-    var response = await ParseUser.getCurrentUserFromServer(token: user.sessionToken);
+    var response = await ParseUser.getCurrentUserFromServer(user.sessionToken);
     if (response == null) return;
     if (response.success) {
       user = response.result;
       userName = user.get("name");
       userEmail = user.get("email");
-      if (user.get("picture") != null) urlPicture = user.get("picture")["url"];
+      if (user.get("picture") != null) {
+        urlPicture = user.get("picture")["url"];
       saveUrlPictureSharedPreferences(user.get("picture")["url"]);
+      }
       _pictureController.sink.add(urlPicture);
       
     }else {
@@ -75,18 +75,23 @@ class UserBloc extends BlocBase{
   }
 
   String getUrlPictureFromSharedPreferences(){
-    urlPicture = (prefs.getString('urlPicture') ?? null);
+    if (prefs != null) urlPicture = (prefs.getString('urlPicture') ?? null);
     _pictureController.sink.add(urlPicture);
     return urlPicture;
 
   }
 
   void saveUrlPictureSharedPreferences(String url) async{
-     await prefs.setString('urlPicture', url);
+      if (url == null) {
+          await prefs.remove("urlPicture");
+      }
+      else await prefs.setString('urlPicture', url);
   }
 
-  void getSharedPreferences() async {
+  Future<Null> getSharedPreferences() async {
     prefs = await SharedPreferences.getInstance();
+    await checkLogin();
+    return;
   }
 
   bool verifySignIn () => user != null;
@@ -165,155 +170,8 @@ class UserBloc extends BlocBase{
     
 }
 
-  Future<LoginState> signInWithFacebook() async {
-      final FacebookLogin facebookLogin = FacebookLogin();
-      final FacebookLoginResult result = await facebookLogin.logIn(['email']);
-
-      switch (result.status) {
-        case FacebookLoginStatus.loggedIn:
-
-          return await getFacebookUserDetails(result);
-          
-          break;
-        case FacebookLoginStatus.cancelledByUser:
-          return LoginState.LOGIN_CANCELED;
-          break;
-        default:
-          return LoginState.LOGIN_FAIL; 
-      }
-  }
-
-  Future<LoginState> getFacebookUserDetails(FacebookLoginResult result) async{
-      final token = result.accessToken.token;
-      final graphResponse = await http.get(
-                  'https://graph.facebook.com/v2.12/me?fields=name,email,picture.type(large)&access_token=$token');
-      final profile = json.decode(graphResponse.body);
-      final ParseResponse response = await ParseUser.loginWith(
-          'facebook',
-          facebook(result.accessToken.token,
-              result.accessToken.userId,
-              result.accessToken.expires));
-              
-
-      if (response.success){
-
-        if (response.result["authData"] == null){
-          String userEmail = profile["email"];
-          String userName = profile["name"];
-          String profilePicture = profile["picture"]["data"]["url"];
-          return await saveUserWith3rdAuth(
-            userEmail:userEmail, 
-            userName: userName,
-            profilePicture: profilePicture,
-
-          );
-        } else {
-          checkLogin();
-          return LoginState.LOGIN_SUCCESSFULLY; //DIRECIONA DIRETO
-        }
-        
-
-      }
-      else {
-        return LoginState.LOGIN_FAIL; //DIRECIONA DIRETO
-      }
-
-  }
-
-  Future<LoginState> saveUserWith3rdAuth({String userEmail, String userName, String profilePicture}) async{
-
-    ParseUser user = await ParseUser.currentUser();
-        if (user.get("email") == null)
-            if (userEmail != null) user.set("email",userEmail);
-        
-        if (user.get("name") == null)
-            user.set("name",userName);
-
-        
-        
-        
-        ParseResponse saveResponse =  await user.save();
-
-        if (saveResponse.success){
-
-          if (user.get("profilePictureUrl") == null) await getImage(profilePicture, shouldAwait: true);
-          checkLogin();
-          return LoginState.LOGIN_SUCCESSFULLY;
-
-        }
-        else if (saveResponse.error.code == 203) // JA EXISTE UMA CONTA SALVA COM ESTE ENDEREÇO DE EMAIL
-          return saveUserWith3rdAuth(
-            userEmail:null, 
-            userName: userName,
-            profilePicture: profilePicture,
-          );
-        else {
-          return LoginState.LOGIN_FAIL;
-        }  
-          
-  }
-  
-  Future<LoginState> signInWithGoogle() async{
-    
-
-   /* try {
-      LoginState signInGoogleResult = await _sigInGoogle();
-
-      if (signInGoogleResult != LoginState.LOGIN_SUCCESSFULLY) return signInGoogleResult; // DEU PROBLEMA NO LOGIN COM GOOGLE
-
-      //LOGIN COM GOOGLE EFETUADO COM SUCESSO, PROSSEGUINDO PARA OS PRÓXIMOS PASSOS
-      GoogleSignInAccount gUser = _googleSignIn.currentUser;
-      GoogleSignInAuthentication auth = await gUser.authentication;
-      _googleSignIn.disconnect();
-
-      print(gUser.photoUrl);
 
 
-      Map<String,dynamic> oAuth = {
-        "id":gUser.id,
-        "access_token": auth.accessToken,
-      };
-
-      final ParseResponse response = await ParseUser.loginWith(
-      'google',oAuth);
-
-      if (response.success){
-        
-        if (response.result["authData"] == null){
-
-          return saveUserWith3rdAuth(
-            userEmail:gUser.email, 
-            userName: gUser.displayName,
-            profilePicture: gUser.photoUrl.replaceFirst("=s96-c", "=s180-c"), 
-          );
-             
-        }  else {
-          
-          checkLogin();
-          return LoginState.LOGIN_SUCCESSFULLY; //DIRECIONA DIRETO
-        }
-        
-       
-        
-        
-      }else  return LoginState.LOGIN_FAIL; 
-
-    } 
-    catch (error) {
-      return LoginState.LOGIN_FAIL; 
-    } */
-  }
-  
-  Future<LoginState> _sigInGoogle() async{
-
-   /* try {
-       var gUser = await _googleSignIn.signIn();
-       if (gUser == null) return LoginState.LOGIN_CANCELED;
-       else return LoginState.LOGIN_SUCCESSFULLY; 
-    } catch (e) {
-      return LoginState.LOGIN_FAIL; 
-    } */
-  }
   
   Future<LoginState> signIn(String username, String password) async{
     
@@ -346,7 +204,7 @@ class UserBloc extends BlocBase{
   Future<Null> getImage(String urlPicture, {bool shouldAwait}) async{
     if (shouldAwait == null) shouldAwait = false;
 
-    var response = await http.get(urlPicture);
+    var response = await http.get(Uri.parse(urlPicture));
 
     File imageFile = await createFileFromString(response);
     if (shouldAwait) await setProfilePicture(imageFile);

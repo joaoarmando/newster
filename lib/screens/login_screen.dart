@@ -29,9 +29,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void initState() {
-    _loginBloc.setUserBloc(_userBloc);
+    _loginBloc.setUserBloc(_userBloc);      
     _loginBloc.outLoginSuccess.listen((loginSuccessfully){
-      
       if (loginSuccessfully) Navigator.popUntil(context,(route) => route.settings.name == "/");
     
     });
@@ -100,7 +99,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               SizedBox(height: 36),
               _buildLogin(context),
-              _buildOtherOptions(context),
               SizedBox(height: 25),
               _buildCreateAnAccountOffer(),
               _preloadFlareActor(),
@@ -157,69 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildOtherOptions(BuildContext context){
-    return Column(
-      children: <Widget>[
-        SizedBox(height: 36),
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                height: 2,
-                margin: const EdgeInsets.symmetric(horizontal:12),
-                decoration: BoxDecoration(
-                  color: secondaryText,
-                  borderRadius: BorderRadius.circular(99)
-                ),
-              ),
-            ),
-            Text(S.of(context).or,
-              style: TextStyle(
-                color: secondaryText,
-                fontWeight: FontWeight.w500,
-                fontSize: 16
-              ),
-            ),
-            Expanded(
-              child: Container(
-                height: 2,
-                margin: const EdgeInsets.symmetric(horizontal:12),
-                decoration: BoxDecoration(
-                  color: secondaryText,
-                  borderRadius: BorderRadius.circular(99)
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 36),
-        LoginButton(
-          text: S.of(context).sign_in_with_facebook,
-          color: Color(0xff1877F2),
-          splashColor: splashColor,
-          textColor: primaryText,
-          function: _loginBloc.signInWithFacebook,
-          loginState: _loginBloc.outLoginFacebookState,
-          successFunction: _loginBloc.sendSuccessLogin,
-          icon: Icon(UpNewsIcons.ic_facebook,color: Colors.white,size: 20,),
-          shadowColor: Colors.transparent,
-        ),
-        SizedBox(height: 36),
-      /*  LoginButton(
-          text: S.of(context).sign_in_with_google,
-          color: Colors.white,
-          splashColor: splashColor,
-          textColor: secondaryText,
-          loginState: _loginBloc.outLoginGoogleState,
-          function: _loginBloc.signInWithGoogle,
-          successFunction: _loginBloc.sendSuccessLogin,
-          icon: Image.asset("assets/images/ic_google.png",height: 21,),
-          shadowColor: Colors.transparent,
-        ), */
-      ],
-    );
-  }
-
   Widget _buildCreateAnAccountOffer(){
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -239,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           onPressed: (){
-             Navigator.pushNamed(context, "/createAccountOptions");
+            Navigator.pushNamed(context, "/createAccount");
           },
         ),
       ],
